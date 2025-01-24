@@ -9,3 +9,9 @@ end
 function get_modules()
     dump_table(getmetatable(_G)["__index"])
 end
+
+-- Display memory stats
+function stats()
+    print("Heap Info: " .. node.heap())
+    print("Flash Size: " .. node.flashsize())
+end
