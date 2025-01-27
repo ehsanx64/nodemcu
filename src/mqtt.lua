@@ -76,9 +76,9 @@ end
 
 tmr.delay(10000)
 
---[[ Development Calls
+--[[-- Development Calls
 
 publish_ip()
 publish_loop()
 
-]]--
+--]]--

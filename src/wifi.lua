@@ -2,7 +2,7 @@
 wifi.setmode(wifi.STATION)
 
 -- Get current mode
-print("Current WiFi mode: " .. wifi.getmode())
+print("! /wifi : current mode: " .. wifi.getmode())
 
 -- Define a callback to display retrieved IP
 function connected(params)
@@ -20,4 +20,4 @@ station_cfg.auto = true
 station_cfg.got_ip_cb = connected
 wifi.sta.config(station_cfg)
 
-print("wifi loaded")
+print("! /wifi : loaded")
