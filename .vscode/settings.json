@@ -1,8 +1,9 @@
 {
     "Lua.diagnostics.globals": [
-        "http"
+        "http", "file", "sjson"
     ],
     "Lua.diagnostics.disable": [
-        "undefined-global"
+        "undefined-global",
+        "lowercase-global"
     ]
 }

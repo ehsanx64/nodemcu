@@ -1,4 +1,4 @@
-m = mqtt.Client(MQTT_CLIENT_ID, 120)
+local m = mqtt.Client(MQTT_CLIENT_ID, 120)
 
 m:lwt("/lwt", "offline", 0, 0)
 

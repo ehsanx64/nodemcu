@@ -1,10 +1,10 @@
-apiUrl = "http://10.42.0.1/json.php"
+local apiUrl = "http://10.42.0.1/json.php"
 http.get(apiUrl, nil, function(code, data)
     if (code < 0) then
         print("HTTP request failed")
     else
         if code == 200 then
-            t = sjson.decode(data)
+            local t = sjson.decode(data)
             data = t.data
 
             print('Command: ' .. t.command)
