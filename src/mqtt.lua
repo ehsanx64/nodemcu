@@ -24,6 +24,17 @@ function handle_node(msg)
     end
 end
 
+
+function publish_loop()
+    local my_timer = tmr.create()
+    
+    my_timer:register(3000, tmr.ALARM_AUTO, function()
+        publish_ip()
+    end)
+    
+    my_timer:start()
+end
+
 -- on publish message receive event
 m:on("message", function(client, topic, data)
     if data ~= nil then
@@ -56,23 +67,15 @@ m:connect(MQTT_HOST, 1883, false,
             print("Subscribed to /node")
         end)        
         
-        -- publish a message with data = hello, QoS = 0, retain = 0
-        client:publish("/node", "boot", 0, 0, function(client)
+        -- publish a message with data = string, QoS = 0, retain = 0
+        msg = "boot:" .. tmr.time()
+        client:publish("/node", msg, 0, 0, function(client)
             print("sent")
         end)
     end,
     function(client, reason) print("Connection failed reason: " .. reason)
 end)
 
-function publish_loop()
-    local my_timer = tmr.create()
-    
-    my_timer:register(3000, tmr.ALARM_AUTO, function()
-        publish_ip()
-    end)
-    
-    my_timer:start()
-end
 
 tmr.delay(10000)
 

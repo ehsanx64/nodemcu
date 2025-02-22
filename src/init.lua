@@ -11,8 +11,7 @@ end
 
 -- Include assets
 if WIFI_ENABLED then dofile("wifi.lua") end
-if MQTT_ENABLED then dofile("mqtt.lua") end
-if TELNET_ENABLED then dofile("telnet-run.lua") telnet:open() end
+if TELNET_ENABLED then telnet = dofile("telnet.lua") end
 
 dofile("led.lua")
 
