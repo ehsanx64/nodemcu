@@ -1,5 +1,11 @@
 -------------------------------------------------------------------------------
 --- Pad file for test and development
 
-msg = "uptime:" .. tmr.time()
-print(msg)
+function main()
+    print()
+    print("Running pad.lua ...")
+end
+
+main()
+
+
