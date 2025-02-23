@@ -1,22 +1,40 @@
 local m = mqtt.Client(MQTT_CLIENT_ID, 120)
 
-m:lwt("/lwt", "offline", 0, 0)
+--[[
+-- Topic Structure
+
+/positron/NODE/TOPIC
+
+NODE    The iot board (MQTT client ID)
+--]]
+
+function getTopic(topicName)
+    return "/positron/" .. MQTT_CLIENT_ID .. "/" .. topicName
+end
 
 function publish_ip()
-    m:publish("/node", wifi.sta.getip(), 0, 0, function(client)
-        print("IP sent to /node")
-    end)
+    -- m:publish(getTopic("stats/ip"), wifi.sta.getip(), 0, 0, function() 
+    --     print()
+    -- end)
+    m:publish(getTopic("stats/ip"), wifi.sta.getip(), 0, 0, nil)
 end
 
-function handle_led(msg)
-    if msg == "on" then
-        led_on()
-    elseif msg == "off" then
-        led_off()
-    else
-        print("undefined message: " .. msg)
-    end
+function mqtt_publish(topicName, value)
+    m:publish(getTopic(topicName), value, 0, 0, nil)
 end
+
+m:lwt(getTopic("lwt"), "offline", 0, 0)
+
+function publish_stats()
+    local root = "stats/"
+    
+    m:publish(getTopic(root .. "heap"), node.heap(), 0, 0, nil)
+    m:publish(getTopic(root .. "time"), tmr.time(), 0, 0, nil)
+    m:publish(getTopic(root .. "chipid"), node.chipid(), 0, 0, nil)
+    m:publish(getTopic(root .. "flashsize"), node.flashsize(), 0, 0, nil)
+    m:publish(getTopic(root .. "cpufreq"), node.getcpufreq(), 0, 0, nil)
+end
+
 
 function handle_node(msg)
     if msg == "ip" then
@@ -24,12 +42,12 @@ function handle_node(msg)
     end
 end
 
-
 function publish_loop()
     local my_timer = tmr.create()
     
     my_timer:register(3000, tmr.ALARM_AUTO, function()
         publish_ip()
+        publish_stats()
     end)
     
     my_timer:start()
@@ -39,13 +57,10 @@ end
 m:on("message", function(client, topic, data)
     if data ~= nil then
         print(topic .. " : " .. data)
-        if topic == "/led" then
-            handle_led(data)
-        elseif topic == "/node" then
-            handle_node(data)
-        end        
+    elseif topic == getTopic("node") then
+        handle_node(data)
     else
-        print(topic)
+        -- print()
     end
 end)
 
@@ -59,29 +74,36 @@ m:connect(MQTT_HOST, 1883, false,
         -- m:on("connect", function)).
         
         -- subscribe topic with qos = 0
-        client:subscribe("/led", 0, function(client)
-            print("Subscribed to /led")
+        client:subscribe(getTopic("led"), 0, function(client)
+            print("Subscribed to " .. getTopic("led"))
         end)
 
-        client:subscribe("/node", 0, function(client)
-            print("Subscribed to /node")
+        client:subscribe(getTopic("boot"), 0, function(client)
+            print("Subscribed to " .. getTopic("node"))
         end)        
         
         -- publish a message with data = string, QoS = 0, retain = 0
-        msg = "boot:" .. tmr.time()
-        client:publish("/node", msg, 0, 0, function(client)
-            print("sent")
+        msg = tmr.time()
+        client:publish(getTopic("boot"), msg, 0, 0, function(client)
+            -- print("sent")
         end)
+        
+        publish_loop()
+        
+        if pingInterface ~= nil and type(pingInterface) == "table" then
+            if pingInterface.SetClient ~= nil then
+                if type(pingInterface.SetClient) == "function" then
+                    pingInterface.SetClient(client)
+                end
+            end
+        end
     end,
     function(client, reason) print("Connection failed reason: " .. reason)
 end)
 
-
 tmr.delay(10000)
 
 --[[-- Development Calls
-
 publish_ip()
 publish_loop()
-
 --]]--
